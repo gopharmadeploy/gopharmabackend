@@ -1,0 +1,69 @@
+version: '3'
+
+services:
+    db:
+        image: mysql
+        container_name: gopharma-db
+        ports:
+            - '5001:3306'
+        environment:
+            - MYSQL_ROOT_PASSWORD=Caracas.2021*
+            - MYSQL_DATABASE=gopharma
+            - MYSQL_PASSWORD=Caracas.2021*
+        restart: always
+        volumes:
+            - gopharma-db-conf.d:/etc/mysql/conf.d
+            - gopharma-db-mysql:/var/lib/mysql
+
+    phpmyadmin:
+        image: phpmyadmin
+        container_name: phpmyadmin
+        ports:
+            - '8080:80'
+        depends_on:
+            - db
+        environment:
+            - PMA_HOST=db
+            - MYSQL_ROOT_PASSWORD=Caracas.2021*
+
+    backend:
+        container_name: gopharma-backend
+        build:
+            dockerfile: Dockerfile
+            target: ${NODE_ENV}
+        env_file:
+            - .env
+        ports:
+            - '${SERVER_PORT}:${SERVER_PORT}'
+        expose:
+            - ${SERVER_PORT}
+        depends_on:
+            - db
+        restart: always
+        volumes:
+            - ./src:/app/src
+            - gopharma-uploads:/app/uploads
+
+    frontend:
+        container_name: gopharma-frontend
+        build:
+            context: ../gopharma-frontend
+            dockerfile: Dockerfile
+            target: ${NODE_ENV}
+        env_file:
+            - ../gopharma-frontend/.env
+        ports:
+            - '${FRONTEND_PORT}:${FRONTEND_PORT}'
+        expose:
+            - ${FRONTEND_PORT}
+        depends_on:
+            - backend
+        volumes:
+            - ../gopharma-frontend/src:/app/src
+            - ../gopharma-frontend/public:/app/public
+        restart: always
+
+volumes:
+    gopharma-db-conf.d:
+    gopharma-db-mysql:
+    gopharma-uploads:
