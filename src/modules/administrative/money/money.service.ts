@@ -18,6 +18,7 @@ export class MoneyService {
         const newMoney = this.moneyRepository.create(createMoneyDto);
         console.log(newMoney);
         this.moneyRepository.save(newMoney);
+        console.log(" crando moneda")
         return 'This action adds a new money';
     }
 
